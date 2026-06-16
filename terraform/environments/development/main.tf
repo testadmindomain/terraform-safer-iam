@@ -42,16 +42,23 @@ module "safer_predict" {
   project_id  = var.project_id
   environment = var.environment
 
+  ksa_name  = "safer-predict"
   gsa_email = module.iam.service_account_email
 
-  orchestration_image    = var.orchestration_image
-  csam_classifier_image  = var.csam_classifier_image
+  orchestration_image_repository = var.orchestration_image_repository
+  orchestration_image_tag        = var.orchestration_image_tag
+
+  csam_classifier_image_repository = var.csam_classifier_image_repository
+  csam_classifier_image_tag        = var.csam_classifier_image_tag
 
   orchestration_replicas   = 1
   csam_classifier_replicas = 1
 
-  metrics_environment  = "staging"
+  metrics_environment   = "staging"
   media_file_size_limit = "104857600"
+
+  image_classifier_precision = "0.999"
+  video_classifier_precision = "0.999"
 
   orchestration_input_subscription = module.pubsub.orchestration_input_subscription
   csam_classifier_topic            = module.pubsub.csam_classifier_topic
@@ -79,4 +86,17 @@ module "gke" {
   max_node_count = 6
 
   machine_type = "e2-standard-2"
+}
+
+module "secrets" {
+  source = "../../modules/secrets"
+
+  project_id  = var.project_id
+  environment = var.environment
+
+  secret_names = [
+    "CUSTOMER_NAME",
+    "METRICS_USER",
+    "METRICS_PASSWORD"
+  ]
 }

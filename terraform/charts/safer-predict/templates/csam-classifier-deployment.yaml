@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csam-classifier
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: csam-classifier
+    environment: {{ .Values.project.environment | quote }}
+    service: safer-predict
+spec:
+  replicas: {{ .Values.replicaCount.csamClassifier }}
+  selector:
+    matchLabels:
+      app: csam-classifier
+  template:
+    metadata:
+      labels:
+        app: csam-classifier
+        environment: {{ .Values.project.environment | quote }}
+        service: safer-predict
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      volumes:
+        - name: safer-secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Values.secrets.providerClassName }}
+      containers:
+        - name: csam-classifier
+          image: "{{ .Values.images.csamClassifier.repository }}:{{ .Values.images.csamClassifier.tag }}"
+          imagePullPolicy: {{ .Values.images.csamClassifier.pullPolicy }}
+          env:
+            - name: ENABLE_API_ONLY_MODE
+              value: "0"
+            - name: QUEUEING_SOLUTION
+              value: "PUBSUB"
+            - name: GCPPUBSUB_PROJECT_NAME
+              value: {{ .Values.pubsub.projectName | quote }}
+            - name: QUEUE_INPUT_QUEUE
+              value: {{ .Values.pubsub.csamClassifier.inputSubscription | quote }}
+            - name: QUEUE_OUTPUT_QUEUE
+              value: {{ .Values.pubsub.csamClassifier.outputTopic | quote }}
+            - name: CUSTOMER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.kubernetesSecretName }}
+                  key: CUSTOMER_NAME
+            - name: METRICS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.kubernetesSecretName }}
+                  key: METRICS_USER
+            - name: METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.kubernetesSecretName }}
+                  key: METRICS_PASSWORD
+            - name: IMAGE_CLASSIFIER_PRECISION
+              value: {{ .Values.classifier.imagePrecision | quote }}
+            - name: VIDEO_CLASSIFIER_PRECISION
+              value: {{ .Values.classifier.videoPrecision | quote }}
+            - name: METRICS_ENVIRONMENT
+              value: {{ .Values.metrics.environment | quote }}
+            - name: LOG_FORMAT
+              value: {{ .Values.logging.format | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.logging.level | quote }}
+            - name: GCS_PROJECT_NAME
+              value: {{ .Values.gcs.projectName | quote }}
+            - name: GCS_USER_AGENT
+              value: {{ .Values.gcs.userAgent | quote }}
+            - name: URL_HTTPS_ONLY
+              value: {{ .Values.url.httpsOnly | quote }}
+            - name: URL_CONNECT_TIMEOUT
+              value: {{ .Values.url.connectTimeout | quote }}
+            - name: URL_READ_TIMEOUT
+              value: {{ .Values.url.readTimeout | quote }}
+            - name: URL_FILE_SIZE_LIMIT
+              value: {{ .Values.url.fileSizeLimit | quote }}
+          volumeMounts:
+            - name: safer-secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+{{ toYaml .Values.resources.csamClassifier | indent 12 }}

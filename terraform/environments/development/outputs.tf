@@ -26,3 +26,7 @@ output "media_bucket_url" {
   value = module.gcs.bucket_url
 }
 
+output "secret_ids" {
+  value = module.secrets.secret_ids
+}
+

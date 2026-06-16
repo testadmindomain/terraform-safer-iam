@@ -17,8 +17,10 @@ services_cidr = "10.62.0.0/20"
 
 media_bucket_name = "mabrook-safer-development-media"
 
-orchestration_image   = "europe-central2-docker.pkg.dev/mabrook-safer-development/safer/safer-orchestration:<version>"
-csam_classifier_image = "europe-central2-docker.pkg.dev/mabrook-safer-development/safer/csam-classifier-pipeline:<version>"
+orchestration_image_repository = "europe-central2-docker.pkg.dev/mabrook-safer-development/safer/safer-orchestration"
+orchestration_image_tag        = "<version>"
 
+csam_classifier_image_repository = "europe-central2-docker.pkg.dev/mabrook-safer-development/safer/csam-classifier-pipeline"
+csam_classifier_image_tag        = "<version>"
 
 cluster_name = "safer-development-cluster"

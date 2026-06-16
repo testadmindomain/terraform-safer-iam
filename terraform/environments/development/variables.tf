@@ -53,3 +53,19 @@ variable "orchestration_image" {
 variable "csam_classifier_image" {
   type = string
 }
+
+variable "orchestration_image_repository" {
+  type = string
+}
+
+variable "orchestration_image_tag" {
+  type = string
+}
+
+variable "csam_classifier_image_repository" {
+  type = string
+}
+
+variable "csam_classifier_image_tag" {
+  type = string
+}

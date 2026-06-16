@@ -1,0 +1,80 @@
+namespace:
+  name: safer-predict-development
+
+serviceAccount:
+  name: safer-predict
+  gcpServiceAccount: ""
+
+project:
+  id: ""
+  environment: development
+
+images:
+  orchestration:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  csamClassifier:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+
+replicaCount:
+  orchestration: 1
+  csamClassifier: 1
+
+metrics:
+  environment: staging
+
+logging:
+  format: JSON
+  level: INFO
+
+gcs:
+  projectName: ""
+  userAgent: mabrook-safer
+
+url:
+  httpsOnly: "1"
+  connectTimeout: "5"
+  readTimeout: "30"
+  fileSizeLimit: "104857600"
+
+pubsub:
+  projectName: ""
+
+  orchestration:
+    inputSubscription: ""
+    csamClassifierTopic: ""
+    pertinentTopic: ""
+    notPertinentTopic: ""
+
+  csamClassifier:
+    inputSubscription: ""
+    outputTopic: ""
+
+classifier:
+  imagePrecision: "0.999"
+  videoPrecision: "0.999"
+
+secrets:
+  providerClassName: safer-secrets
+  kubernetesSecretName: safer-secrets
+
+resources:
+  orchestration:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  csamClassifier:
+    requests:
+      cpu: 2000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 4Gi
