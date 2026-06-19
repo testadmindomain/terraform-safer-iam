@@ -6,14 +6,6 @@ resource "google_service_account" "safer_predict" {
   display_name = "Safer Predict ${var.environment}"
 }
 
-resource "google_service_account" "safer_predict" {
-  project      = var.project_id
-
-  account_id   = "safer-predict-${var.environment}"
-
-  display_name = "Safer Predict ${var.environment}"
-}
-
 resource "google_project_iam_member" "pubsub_publisher" {
   project = var.project_id
 

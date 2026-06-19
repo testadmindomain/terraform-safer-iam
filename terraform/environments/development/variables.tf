@@ -42,18 +42,6 @@ variable "services_cidr" {
   type = string
 }
 
-variable "media_bucket_name" {
-  type = string
-}
-
-variable "orchestration_image" {
-  type = string
-}
-
-variable "csam_classifier_image" {
-  type = string
-}
-
 variable "orchestration_image_repository" {
   type = string
 }

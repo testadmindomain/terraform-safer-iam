@@ -1,4 +1,4 @@
-project_id  = "mabrook-safer-development"
+project_id  = "wired-strategy-457015-b1"
 region      = "europe-central2"
 environment = "development"
 
@@ -6,8 +6,6 @@ network_name = "safer-development-vpc"
 subnet_name  = "safer-development-subnet"
 
 cluster_name = "safer-development-cluster"
-
-media_bucket_name = "safer-development-media"
 
 resource_prefix = "safer-development"
 
@@ -23,4 +21,3 @@ orchestration_image_tag        = "<version>"
 csam_classifier_image_repository = "europe-central2-docker.pkg.dev/mabrook-safer-development/safer/csam-classifier-pipeline"
 csam_classifier_image_tag        = "<version>"
 
-cluster_name = "safer-development-cluster"
