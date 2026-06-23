@@ -20,6 +20,13 @@ resource "google_project_iam_member" "pubsub_subscriber" {
   member = "serviceAccount:${google_service_account.safer_predict.email}"
 }
 
+resource "google_project_iam_member" "pubsub_viewer" {
+  project = var.project_id
+
+  role   = "roles/pubsub.viewer"
+  member = "serviceAccount:${google_service_account.safer_predict.email}"
+}
+
 resource "google_project_iam_member" "storage_viewer" {
   project = var.project_id
 
@@ -46,4 +53,12 @@ resource "google_project_iam_member" "artifact_registry_reader" {
 
   role   = "roles/artifactregistry.reader"
   member = "serviceAccount:${google_service_account.safer_predict.email}"
+}
+
+resource "google_service_account_iam_member" "workload_identity_user" {
+  service_account_id = google_service_account.safer_predict.name
+
+  role = "roles/iam.workloadIdentityUser"
+
+  member = "serviceAccount:${var.project_id}.svc.id.goog[${var.namespace}/${var.ksa_name}]"
 }

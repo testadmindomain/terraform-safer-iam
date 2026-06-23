@@ -1,13 +1,26 @@
+resource "kubernetes_namespace" "this" {
+  metadata {
+    name = var.namespace
+
+    labels = {
+      name        = var.namespace
+      environment = var.environment
+      app         = "safer-predict"
+      managed-by  = "terraform"
+    }
+  }
+}
+
 resource "helm_release" "this" {
   name             = "safer-predict"
   chart            = "${path.root}/../../charts/safer-predict"
-  namespace        = var.namespace
+  namespace        = kubernetes_namespace.this.metadata[0].name
   create_namespace = false
 
   values = [
     yamlencode({
       namespace = {
-        name = var.namespace
+        name = kubernetes_namespace.this.metadata[0].name
       }
 
       serviceAccount = {
@@ -47,28 +60,28 @@ resource "helm_release" "this" {
         projectName = var.project_id
 
         orchestration = {
-          inputSubscription = var.orchestration_input_subscription
+          inputSubscription  = var.orchestration_input_subscription
           csamClassifierTopic = var.csam_classifier_topic
-          pertinentTopic = var.results_pertinent_topic
-          notPertinentTopic = var.results_not_pertinent_topic
+          pertinentTopic     = var.results_pertinent_topic
+          notPertinentTopic  = var.results_not_pertinent_topic
         }
 
         csamClassifier = {
           inputSubscription = var.csam_classifier_subscription
-          outputTopic = var.orchestration_callback_topic
+          outputTopic       = var.orchestration_callback_topic
         }
       }
 
       gcs = {
         projectName = var.project_id
-        userAgent = "mabrook-safer"
+        userAgent   = "mabrook-safer"
       }
 
       url = {
-        httpsOnly = "1"
+        httpsOnly      = "1"
         connectTimeout = "5"
-        readTimeout = "30"
-        fileSizeLimit = var.media_file_size_limit
+        readTimeout    = "30"
+        fileSizeLimit  = var.media_file_size_limit
       }
 
       classifier = {
@@ -76,5 +89,9 @@ resource "helm_release" "this" {
         videoPrecision = var.video_classifier_precision
       }
     })
+  ]
+
+  depends_on = [
+    kubernetes_namespace.this
   ]
 }

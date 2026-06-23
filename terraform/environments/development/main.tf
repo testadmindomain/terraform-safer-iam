@@ -1,3 +1,7 @@
+locals {
+  namespace = "safer-predict-${var.environment}"
+}
+
 module "network" {
   source = "../../modules/network"
 
@@ -26,6 +30,9 @@ module "iam" {
 
   project_id  = var.project_id
   environment = var.environment
+
+  namespace = local.namespace
+  ksa_name  = "safer-predict"
 }
 
 module "pubsub" {
@@ -38,7 +45,7 @@ module "pubsub" {
 module "safer_predict" {
   source = "../../modules/safer_predict"
 
-  namespace   = "safer-predict-development"
+  namespace   = local.namespace
   project_id  = var.project_id
   environment = var.environment
 
@@ -57,15 +64,23 @@ module "safer_predict" {
   metrics_environment   = "staging"
   media_file_size_limit = "104857600"
 
-  image_classifier_precision = "0.999"
-  video_classifier_precision = "0.999"
+  image_classifier_precision = "99.9"
+  video_classifier_precision = "99.9"
 
   orchestration_input_subscription = module.pubsub.orchestration_input_subscription
   csam_classifier_topic            = module.pubsub.csam_classifier_topic
   csam_classifier_subscription     = module.pubsub.csam_classifier_subscription
-  orchestration_callback_topic     = module.pubsub.orchestration_callback_topic
+  orchestration_callback_topic     = module.pubsub.input_topic
   results_pertinent_topic          = module.pubsub.results_pertinent_topic
   results_not_pertinent_topic      = module.pubsub.results_not_pertinent_topic
+
+  depends_on = [
+    module.gke,
+    module.iam,
+    module.pubsub,
+    module.secrets,
+    module.gcs
+  ]
 }
 
 module "gke" {
@@ -73,6 +88,7 @@ module "gke" {
 
   project_id   = var.project_id
   region       = var.region
+  zone         = var.zone
   cluster_name = var.cluster_name
 
   network_self_link = module.network.network_self_link
@@ -81,11 +97,11 @@ module "gke" {
   pods_range_name     = module.network.pods_range_name
   services_range_name = module.network.services_range_name
 
-  node_count     = 3
-  min_node_count = 3
-  max_node_count = 6
+  node_count     = var.node_count
+  min_node_count = var.min_node_count
+  max_node_count = var.max_node_count
 
-  machine_type = "e2-standard-2"
+  machine_type = "e2-standard-4"
 }
 
 module "secrets" {

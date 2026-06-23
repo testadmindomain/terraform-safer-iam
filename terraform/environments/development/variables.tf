@@ -57,3 +57,19 @@ variable "csam_classifier_image_repository" {
 variable "csam_classifier_image_tag" {
   type = string
 }
+
+variable "zone" {
+  type = string
+}
+
+variable "node_count" {
+  type = number
+}
+
+variable "min_node_count" {
+  type = number
+}
+
+variable "max_node_count" {
+  type = number
+}

@@ -28,7 +28,7 @@ variable "services_range_name" {
 
 variable "node_count" {
   type    = number
-  default = 3
+  default = 1
 }
 
 variable "min_node_count" {
@@ -44,4 +44,9 @@ variable "max_node_count" {
 variable "machine_type" {
   type    = string
   default = "e2-standard-2"
+}
+
+variable "zone" {
+  description = "GKE zone"
+  type        = string
 }

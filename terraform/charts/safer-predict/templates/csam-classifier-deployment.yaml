@@ -23,7 +23,7 @@ spec:
       volumes:
         - name: safer-secrets-store
           csi:
-            driver: secrets-store.csi.k8s.io
+            driver: secrets-store-gke.csi.k8s.io
             readOnly: true
             volumeAttributes:
               secretProviderClass: {{ .Values.secrets.providerClassName }}
@@ -31,6 +31,13 @@ spec:
         - name: csam-classifier
           image: "{{ .Values.images.csamClassifier.repository }}:{{ .Values.images.csamClassifier.tag }}"
           imagePullPolicy: {{ .Values.images.csamClassifier.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              export CUSTOMER_NAME="$(cat /mnt/secrets-store/CUSTOMER_NAME)"
+              export METRICS_USER="$(cat /mnt/secrets-store/METRICS_USER)"
+              export METRICS_PASSWORD="$(cat /mnt/secrets-store/METRICS_PASSWORD)"
+              exec poetry run python -m csam_classifier
           env:
             - name: ENABLE_API_ONLY_MODE
               value: "0"
@@ -42,21 +49,6 @@ spec:
               value: {{ .Values.pubsub.csamClassifier.inputSubscription | quote }}
             - name: QUEUE_OUTPUT_QUEUE
               value: {{ .Values.pubsub.csamClassifier.outputTopic | quote }}
-            - name: CUSTOMER_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets.kubernetesSecretName }}
-                  key: CUSTOMER_NAME
-            - name: METRICS_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets.kubernetesSecretName }}
-                  key: METRICS_USER
-            - name: METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets.kubernetesSecretName }}
-                  key: METRICS_PASSWORD
             - name: IMAGE_CLASSIFIER_PRECISION
               value: {{ .Values.classifier.imagePrecision | quote }}
             - name: VIDEO_CLASSIFIER_PRECISION
@@ -84,4 +76,4 @@ spec:
               mountPath: /mnt/secrets-store
               readOnly: true
           resources:
-{{ toYaml .Values.resources.csamClassifier | indent 12 }}
+      {{ toYaml .Values.resources.csamClassifier | nindent 12 }}

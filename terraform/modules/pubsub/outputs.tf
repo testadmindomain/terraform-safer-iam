@@ -39,3 +39,7 @@ output "results_pertinent_topic" {
 output "results_not_pertinent_topic" {
   value = google_pubsub_topic.this["results_not_pertinent"].name
 }
+
+output "input_topic" {
+  value = google_pubsub_topic.this["input"].name
+}

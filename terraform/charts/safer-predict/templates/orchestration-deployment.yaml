@@ -23,7 +23,7 @@ spec:
       volumes:
         - name: safer-secrets-store
           csi:
-            driver: secrets-store.csi.k8s.io
+            driver: secrets-store-gke.csi.k8s.io
             readOnly: true
             volumeAttributes:
               secretProviderClass: {{ .Values.secrets.providerClassName }}
@@ -31,6 +31,13 @@ spec:
         - name: safer-orchestration
           image: "{{ .Values.images.orchestration.repository }}:{{ .Values.images.orchestration.tag }}"
           imagePullPolicy: {{ .Values.images.orchestration.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              export CUSTOMER_NAME="$(cat /mnt/secrets-store/CUSTOMER_NAME)"
+              export METRICS_USER="$(cat /mnt/secrets-store/METRICS_USER)"
+              export METRICS_PASSWORD="$(cat /mnt/secrets-store/METRICS_PASSWORD)"
+              exec poetry run python -m orchestration
           env:
             - name: ENABLE_API_ONLY_MODE
               value: "0"
@@ -46,21 +53,6 @@ spec:
               value: {{ .Values.pubsub.orchestration.pertinentTopic | quote }}
             - name: QUEUE_NOT_PERTINENT_QUEUE
               value: {{ .Values.pubsub.orchestration.notPertinentTopic | quote }}
-            - name: CUSTOMER_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets.kubernetesSecretName }}
-                  key: CUSTOMER_NAME
-            - name: METRICS_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets.kubernetesSecretName }}
-                  key: METRICS_USER
-            - name: METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets.kubernetesSecretName }}
-                  key: METRICS_PASSWORD
             - name: METRICS_ENVIRONMENT
               value: {{ .Values.metrics.environment | quote }}
             - name: LOG_FORMAT
@@ -84,4 +76,4 @@ spec:
               mountPath: /mnt/secrets-store
               readOnly: true
           resources:
-{{ toYaml .Values.resources.orchestration | indent 12 }}
+      {{ toYaml .Values.resources.orchestration | nindent 12 }}
